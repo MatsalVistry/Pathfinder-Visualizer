@@ -15,10 +15,10 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
     int brushWidth = 10;
     vertex[][] screen = new vertex[700/brushWidth][700/brushWidth];
     int status = 1;
-    int startRow = screen[0].length/4;
-    int startCol = screen.length/2;
-    int endRow = screen[0].length-startRow;
-    int endCol = screen.length/2;
+    int startRow = screen.length/2;
+    int startCol = screen[0].length/4;
+    int endRow = screen.length/2;
+    int endCol = screen[0].length-startCol;
     boolean search = false;
     int changeRow = 0;
     int changeCol = 0;
@@ -73,16 +73,16 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
             for (int col = 0; col < screen[0].length; col++)
             {
                 if (screen[row][col].getVal() == 1)
-                    g.fillRect(row * brushWidth, col * brushWidth, brushWidth, brushWidth);
+                    g.fillRect(col * brushWidth, row * brushWidth, brushWidth, brushWidth);
                 else if (screen[row][col].getVal() == 2)
                 {
                     g.setColor(Color.green);
-                    g.fillRect(row * brushWidth, col * brushWidth, brushWidth, brushWidth);
+                    g.fillRect(col * brushWidth, row * brushWidth, brushWidth, brushWidth);
                     g.setColor(Color.black);
                 } else if (screen[row][col].getVal() == 3)
                 {
                     g.setColor(Color.red);
-                    g.fillRect(row * brushWidth, col * brushWidth, brushWidth, brushWidth);
+                    g.fillRect(col * brushWidth, row * brushWidth, brushWidth, brushWidth);
                     g.setColor(Color.black);
                 }
             }
@@ -91,7 +91,7 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
         if(search && !sol)
         {
             g.setColor(Color.blue);
-            g.fillRect(changeRow * brushWidth, changeCol * brushWidth, brushWidth, brushWidth);
+            g.fillRect(changeCol * brushWidth, changeRow * brushWidth, brushWidth, brushWidth);
         }
         else
         {
@@ -100,23 +100,23 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
             while(!everything.isEmpty())
             {
                 vertex v = everything.removeFirst();
-                g.fillRect(v.getRow() * brushWidth, v.getCol() * brushWidth, brushWidth, brushWidth);
+                g.fillRect(v.getCol() * brushWidth, v.getRow() * brushWidth, brushWidth, brushWidth);
             }
             g.setColor(Color.orange);
             while(!path.isEmpty())
             {
                 vertex v = path.removeFirst();
-                g.fillRect(v.getRow() * brushWidth, v.getCol() * brushWidth, brushWidth, brushWidth);
+                g.fillRect(v.getCol() * brushWidth, v.getRow() * brushWidth, brushWidth, brushWidth);
             }
             g.setColor(Color.green);
-            g.fillRect(startRow * brushWidth, startCol * brushWidth, brushWidth, brushWidth);
+            g.fillRect(startCol * brushWidth, startRow * brushWidth, brushWidth, brushWidth);
             g.setColor(Color.red);
-            g.fillRect(endRow * brushWidth, endCol * brushWidth, brushWidth, brushWidth);
+            g.fillRect(endCol * brushWidth, endRow * brushWidth, brushWidth, brushWidth);
 
             g.setColor(Color.BLACK);
             for(vertex v : walls)
             {
-                g.fillRect(v.getRow() * brushWidth, v.getCol() * brushWidth, brushWidth, brushWidth);
+                g.fillRect(v.getCol() * brushWidth, v.getRow() * brushWidth, brushWidth, brushWidth);
             }
             search=false;
             sol = false;
@@ -188,16 +188,16 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
             if (status == 2 && e.getX() < 700 && e.getX() >= 0 && e.getY() >= 0 && e.getY() < 700)
             {
                 screen[startRow][startCol].setVal(0);
-                startRow = xpos / brushWidth;
-                startCol = ypos / brushWidth;
+                startRow = ypos / brushWidth;
+                startCol = xpos / brushWidth;
                 screen[startRow][startCol].setVal(2);
                 repaint();
             }
             if (status == 3 && e.getX() < 700 && e.getX() >= 0 && e.getY() >= 0 && e.getY() < 700)
             {
                 screen[endRow][endCol].setVal(0);
-                endRow = xpos / brushWidth;
-                endCol = ypos / brushWidth;
+                endRow = ypos / brushWidth;
+                endCol = xpos / brushWidth;
                 screen[endRow][endCol].setVal(3);
                 repaint();
             }
@@ -231,8 +231,8 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
             if (e.getX() < 700 && e.getX() >= 0 && e.getY() >= 0 && e.getY() < 700)
             {
                 System.out.println(e.getX() + "         " + e.getY());
-                screen[xpos / brushWidth][ypos / brushWidth].setVal(1);
-                walls.add(screen[xpos/brushWidth][ypos/brushWidth]);
+                screen[ypos / brushWidth][xpos / brushWidth].setVal(1);
+                walls.add(screen[ypos/brushWidth][xpos/brushWidth]);
                 repaint();
             }
         }
@@ -361,7 +361,7 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
                     changeRow = parent.getRow();
                     changeCol = parent.getCol();
                     if(parent.getVal()==0)
-                        paintImmediately(changeRow * brushWidth, changeCol * brushWidth, brushWidth, brushWidth);
+                        paintImmediately(changeCol * brushWidth, changeRow * brushWidth, brushWidth, brushWidth);
                     try
                     {
                         Thread.sleep(sleeptime);
@@ -419,7 +419,7 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
                 changeRow = parent.getRow();
                 changeCol = parent.getCol();
                 if(parent.getVal()==0)
-                    paintImmediately(changeRow * brushWidth, changeCol * brushWidth, brushWidth, brushWidth);
+                    paintImmediately(changeCol * brushWidth, changeRow * brushWidth, brushWidth, brushWidth);
                 try
                 {
                     Thread.sleep(sleeptime);
@@ -433,12 +433,16 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
                     vertex v = ll2.removeFirst();
                     if(v.getVal()!=1)
                     {
-                        if (hs.contains(v.getRow() + " " + v.getCol()) && ((parent.getDirection() == 1 && v.getDirection() == 2) || (parent.getDirection() == 2 && v.getDirection() == 1)))
+                        if (hs.contains(v.getRow() + " " + v.getCol()) && parent.getDirection() == 2 && v.getDirection() == 1)
                         {
                             screen[startRow][startCol].setParent(parent);
                             return v;
                         }
-
+                        if (hs.contains(v.getRow() + " " + v.getCol()) && parent.getDirection() == 1 && v.getDirection() == 2)
+                        {
+                            screen[startRow][startCol].setParent(v);
+                            return parent;
+                        }
                         if (!hs.contains(v.getRow() + " " + v.getCol()))
                         {
                             if (parent.getDirection() == 1)
