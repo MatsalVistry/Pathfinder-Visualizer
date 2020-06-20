@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.LinkedList;
 
 
@@ -21,6 +22,9 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
     boolean search = false;
     int changeRow = 0;
     int changeCol = 0;
+    boolean sol = false;
+    int sleeptime = 1;
+    LinkedList<vertex> path = new LinkedList<>();
 
 
     public MazePanel ()
@@ -80,9 +84,14 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
                 }
             }
         }
-        else
+        else if(search && !sol)
         {
             g.setColor(Color.blue);
+            g.fillRect(changeRow * brushWidth, changeCol * brushWidth, brushWidth, brushWidth);
+        }
+        else
+        {
+            g.setColor(Color.orange);
             g.fillRect(changeRow * brushWidth, changeCol * brushWidth, brushWidth, brushWidth);
         }
     }
@@ -109,10 +118,28 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
         {
             search = true;
             vertex bfs = BFS(screen,startRow,startCol);
-            if(bfs!=null)
-                System.out.println(bfs.getRow()+" "+bfs.getCol()+" "+bfs.getVal());
-            else
+
+            if(bfs==null)
                 System.out.println("No Solution");
+            else
+            {
+                sol=true;
+                while (bfs.getParent() != null)
+                {
+                    try
+                    {
+                        Thread.sleep(sleeptime);
+                    } catch (InterruptedException ex)
+                    {
+                        ex.printStackTrace();
+                    }
+                    paintImmediately(bfs.getRow() * brushWidth, bfs.getCol() * brushWidth, brushWidth, brushWidth);
+                    System.out.println(bfs.getRow() + " " + bfs.getCol());
+                    path.addLast(bfs);
+                    bfs = bfs.getParent();
+                }
+                sol = false;
+            }
             search = false;
         }
 
@@ -180,6 +207,7 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
         private vertex parent;
         private int val;
         private boolean visited;
+        private int direction;
 
         public vertex(int row, int col, int val)
         {
@@ -188,6 +216,7 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
             this.val=val;
             parent=null;
             visited= false;
+            direction = 0;
         }
 
         public void setVal(char val)
@@ -203,6 +232,16 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
         public int getVal()
         {
             return val;
+        }
+
+        public int getDirection()
+        {
+            return direction;
+        }
+
+        public void setDirection(int direction)
+        {
+            this.direction = direction;
         }
 
         public void setVal(int val)
@@ -276,32 +315,132 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
             vertex parent = ll.removeFirst();
             parent.setVisited(true);
 
-            if(!hs.contains(parent.getRow()+" "+parent.getCol()))
-            {
+
                 hs.add(parent.row+" "+parent.col);
                 if (parent.getVal() == 0 || parent.getVal() == 2)
                 {
                     changeRow = parent.getRow();
                     changeCol = parent.getCol();
-                    paintImmediately(changeRow * brushWidth, changeCol * brushWidth, brushWidth, brushWidth);
-
+                    if(parent.getVal()==0)
+                        paintImmediately(changeRow * brushWidth, changeCol * brushWidth, brushWidth, brushWidth);
+                    try
+                    {
+                        Thread.sleep(sleeptime);
+                    } catch (InterruptedException ex)
+                    {
+                        ex.printStackTrace();
+                    }
                     LinkedList<vertex> ll2 = parent.getNeighbors(board);
                     while (!ll2.isEmpty())
                     {
                         vertex v = ll2.removeFirst();
-                        v.setParent(parent);
-                        ll.addLast(v);
+                        if(!hs.contains(v.getRow()+" "+v.getCol()))
+                        {
+                            v.setParent(parent);
+                            ll.addLast(v);
+                            hs.add(v.getRow()+" "+v.getCol());
+                        }
                         if(v.getVal()==3)
                             return v;
-
                     }
                 }
-            }
+
             else if(parent.getVal()==3)
             {
                 return parent;
             }
         }
         return null;
+    }
+    public vertex BDS(vertex[][] board)
+    {
+        HashSet<String> hs = new HashSet<>();
+        for(int x=0;x<board.length;x++)
+        {
+            for(int y=0;y<board[0].length;y++)
+            {
+                board[x][y].setVisited(false);
+            }
+        }
+        LinkedList<vertex> ll = new LinkedList<>();
+        ll.add(board[startRow][startCol]);
+        ll.add(board[endRow][endCol]);
+
+        while(!ll.isEmpty())
+        {
+            vertex parent = ll.removeFirst();
+            parent.setVisited(true);
+
+            hs.add(parent.row+" "+parent.col);
+            if (parent.getVal() == 0 || parent.getVal() == 2 || parent.getVal()==3)
+            {
+                changeRow = parent.getRow();
+                changeCol = parent.getCol();
+                if(parent.getVal()==0)
+                    paintImmediately(changeRow * brushWidth, changeCol * brushWidth, brushWidth, brushWidth);
+                try
+                {
+                    Thread.sleep(sleeptime);
+                } catch (InterruptedException ex)
+                {
+                    ex.printStackTrace();
+                }
+                LinkedList<vertex> ll2 = parent.getNeighbors(board);
+                while (!ll2.isEmpty())
+                {
+                    vertex v = ll2.removeFirst();
+                    if(v.getDirection()==1 && parent.getDirection()==2)
+                    {
+                        //v.setParent(parent);
+                        screen[endRow][endCol].setParent(v.getParent());
+                        return v;
+                    }
+                    if(!hs.contains(v.getRow()+" "+v.getCol()))
+                    {
+                        if(parent.getDirection()==1)
+                        {
+                            v.setParent(parent);
+                            v.setDirection(1);
+                            ll.addLast(v);
+                            hs.add(v.getRow() + " " + v.getCol());
+                        }
+                        else
+                        {
+                            v.setParent(parent);
+                            v.setDirection(2);
+                            ll.addLast(v);
+                            hs.add(v.getRow() + " " + v.getCol());
+                        }
+                    }
+
+                }
+            }
+        }
+        return null;
+    }
+    public boolean DFS(vertex[][] board, vertex v, HashSet<String> hs)
+    {
+        v.setVisited(true);
+        changeRow = v.getRow();
+        changeCol = v.getCol();
+        paintImmediately(changeRow * brushWidth, changeCol * brushWidth, brushWidth, brushWidth);
+        hs.add(v.getRow()+" "+v.getCol());
+        if(v.getVal()==3)
+            return true;
+
+        LinkedList<vertex> vertices = v.getNeighbors(board);
+
+        for(int x=0;x<vertices.size();x++)
+        {
+            vertex vv = vertices.removeFirst();
+
+            if (!vv.isVisited() && !hs.contains(vv.getRow()+" "+vv.getCol()) &&  vv.getVal() != 1)
+            {
+                vv.setParent(v);
+                return DFS(board, vv, hs);
+            }
+        }
+
+        return false;
     }
 }
