@@ -32,8 +32,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/MazePanel.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="262">
-              <caret line="393" column="44" lean-forward="true" selection-start-line="393" selection-start-column="44" selection-end-line="393" selection-end-column="44" />
+            <state relative-caret-position="245">
+              <caret line="310" lean-forward="true" selection-start-line="310" selection-end-line="310" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#3536#3537#0" expanded="true" />
@@ -274,8 +274,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/MazePanel.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="262">
-          <caret line="393" column="44" lean-forward="true" selection-start-line="393" selection-start-column="44" selection-end-line="393" selection-end-column="44" />
+        <state relative-caret-position="245">
+          <caret line="310" lean-forward="true" selection-start-line="310" selection-end-line="310" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#3536#3537#0" expanded="true" />

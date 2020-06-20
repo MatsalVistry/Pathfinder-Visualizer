@@ -23,8 +23,12 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
     int changeRow = 0;
     int changeCol = 0;
     boolean sol = false;
+
     int sleeptime = 1;
+
     LinkedList<vertex> path = new LinkedList<>();
+    LinkedList<vertex> everything = new LinkedList<>();
+    ArrayList<vertex> walls = new ArrayList<>();
 
 
     public MazePanel ()
@@ -47,52 +51,75 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
     }
     public void paint(Graphics g)
     {
-        if(!search)
-        {
-            g.setColor(Color.white);
-            g.fillRect(0, 0, 700, 700);
-            Color lightBrown = new Color(178, 113, 33);
-            g.setColor(lightBrown);
-            g.fillRect(700, 0, 100, 700);
-            g.setColor(Color.black);
-            g.fillRect(725, 25, 50, 50);
-            g.setColor(Color.green);
-            g.fillRect(725, 100, 50, 50);
-            g.setColor(Color.red);
-            g.fillRect(725, 175, 50, 50);
-            g.setColor(Color.blue);
-            g.fillRect(725, 250, 50, 50);
+        g.setColor(Color.white);
+        g.fillRect(0, 0, 700, 700);
+        Color lightBrown = new Color(178, 113, 33);
+        g.setColor(lightBrown);
+        g.fillRect(700, 0, 100, 700);
+        g.setColor(Color.black);
+        g.fillRect(725, 25, 50, 50);
+        g.setColor(Color.green);
+        g.fillRect(725, 100, 50, 50);
+        g.setColor(Color.red);
+        g.fillRect(725, 175, 50, 50);
+        g.setColor(Color.blue);
+        g.fillRect(725, 250, 50, 50);
+        g.setColor(Color.white);
+        g.fillRect(725, 325, 50, 50);
 
-            g.setColor(Color.BLACK);
-            for (int row = 0; row < screen.length; row++)
+        g.setColor(Color.BLACK);
+        for (int row = 0; row < screen.length; row++)
+        {
+            for (int col = 0; col < screen[0].length; col++)
             {
-                for (int col = 0; col < screen[0].length; col++)
+                if (screen[row][col].getVal() == 1)
+                    g.fillRect(row * brushWidth, col * brushWidth, brushWidth, brushWidth);
+                else if (screen[row][col].getVal() == 2)
                 {
-                    if (screen[row][col].getVal() == 1)
-                        g.fillRect(row * brushWidth, col * brushWidth, brushWidth, brushWidth);
-                    else if (screen[row][col].getVal() == 2)
-                    {
-                        g.setColor(Color.green);
-                        g.fillRect(row * brushWidth, col * brushWidth, brushWidth, brushWidth);
-                        g.setColor(Color.black);
-                    } else if (screen[row][col].getVal() == 3)
-                    {
-                        g.setColor(Color.red);
-                        g.fillRect(row * brushWidth, col * brushWidth, brushWidth, brushWidth);
-                        g.setColor(Color.black);
-                    }
+                    g.setColor(Color.green);
+                    g.fillRect(row * brushWidth, col * brushWidth, brushWidth, brushWidth);
+                    g.setColor(Color.black);
+                } else if (screen[row][col].getVal() == 3)
+                {
+                    g.setColor(Color.red);
+                    g.fillRect(row * brushWidth, col * brushWidth, brushWidth, brushWidth);
+                    g.setColor(Color.black);
                 }
             }
         }
-        else if(search && !sol)
+
+        if(search && !sol)
         {
             g.setColor(Color.blue);
             g.fillRect(changeRow * brushWidth, changeCol * brushWidth, brushWidth, brushWidth);
         }
         else
         {
+            System.out.println(everything.size()+"     "+path.size());
+            g.setColor(Color.blue);
+            while(!everything.isEmpty())
+            {
+                vertex v = everything.removeFirst();
+                g.fillRect(v.getRow() * brushWidth, v.getCol() * brushWidth, brushWidth, brushWidth);
+            }
             g.setColor(Color.orange);
-            g.fillRect(changeRow * brushWidth, changeCol * brushWidth, brushWidth, brushWidth);
+            while(!path.isEmpty())
+            {
+                vertex v = path.removeFirst();
+                g.fillRect(v.getRow() * brushWidth, v.getCol() * brushWidth, brushWidth, brushWidth);
+            }
+            g.setColor(Color.green);
+            g.fillRect(startRow * brushWidth, startCol * brushWidth, brushWidth, brushWidth);
+            g.setColor(Color.red);
+            g.fillRect(endRow * brushWidth, endCol * brushWidth, brushWidth, brushWidth);
+
+            g.setColor(Color.BLACK);
+            for(vertex v : walls)
+            {
+                g.fillRect(v.getRow() * brushWidth, v.getCol() * brushWidth, brushWidth, brushWidth);
+            }
+            search=false;
+            sol = false;
         }
     }
 
@@ -117,13 +144,13 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
         if(e.getX()>725 && e.getX()<775 && e.getY()>250 && e.getY()<300)
         {
             search = true;
-            vertex bfs = BFS(screen,startRow,startCol);
+            vertex bfs = BDS(screen);
 
             if(bfs==null)
                 System.out.println("No Solution");
             else
             {
-                sol=true;
+                sol = true;
                 while (bfs.getParent() != null)
                 {
                     try
@@ -133,35 +160,47 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
                     {
                         ex.printStackTrace();
                     }
-                    paintImmediately(bfs.getRow() * brushWidth, bfs.getCol() * brushWidth, brushWidth, brushWidth);
-                    System.out.println(bfs.getRow() + " " + bfs.getCol());
+                    //paintImmediately(bfs.getRow() * brushWidth, bfs.getCol() * brushWidth, brushWidth, brushWidth);
+                    System.out.println(bfs.getRow() + " s " + bfs.getCol());
                     path.addLast(bfs);
                     bfs = bfs.getParent();
                 }
-                sol = false;
             }
+            search = true;
+            sol = true;
+            repaint();
+            System.out.println("Finished Search");
+        }
+        if(e.getX()>725 && e.getX()<775 && e.getY()>325 && e.getY()<375)
+        {
+            status = 1;
             search = false;
+            sol = false;
+            repaint();
         }
+        else
+        {
 
-        int xpos = e.getX();
-        xpos -= xpos % brushWidth;
-        int ypos = e.getY();
-        ypos -= ypos % brushWidth;
-        if(status == 2 && e.getX() < 700 && e.getX() >= 0 && e.getY() >= 0 && e.getY() < 700)
-        {
-            screen[startRow][startCol].setVal(0);
-            startRow = xpos / brushWidth;
-            startCol = ypos / brushWidth;
-            screen[startRow][startCol].setVal(2);
-            repaint();
-        }
-        if(status == 3 && e.getX() < 700 && e.getX() >= 0 && e.getY() >= 0 && e.getY() < 700)
-        {
-            screen[endRow][endCol].setVal(0);
-            endRow = xpos / brushWidth;
-            endCol = ypos / brushWidth;
-            screen[endRow][endCol].setVal(3);
-            repaint();
+            int xpos = e.getX();
+            xpos -= xpos % brushWidth;
+            int ypos = e.getY();
+            ypos -= ypos % brushWidth;
+            if (status == 2 && e.getX() < 700 && e.getX() >= 0 && e.getY() >= 0 && e.getY() < 700)
+            {
+                screen[startRow][startCol].setVal(0);
+                startRow = xpos / brushWidth;
+                startCol = ypos / brushWidth;
+                screen[startRow][startCol].setVal(2);
+                repaint();
+            }
+            if (status == 3 && e.getX() < 700 && e.getX() >= 0 && e.getY() >= 0 && e.getY() < 700)
+            {
+                screen[endRow][endCol].setVal(0);
+                endRow = xpos / brushWidth;
+                endCol = ypos / brushWidth;
+                screen[endRow][endCol].setVal(3);
+                repaint();
+            }
         }
     }
 
@@ -193,6 +232,7 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
             {
                 System.out.println(e.getX() + "         " + e.getY());
                 screen[xpos / brushWidth][ypos / brushWidth].setVal(1);
+                walls.add(screen[xpos/brushWidth][ypos/brushWidth]);
                 repaint();
             }
         }
@@ -297,7 +337,7 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
             return ll;
         }
     }
-    public vertex BFS(vertex[][] board, int startRow, int startCol)
+    public vertex BFS(vertex[][] board)
     {
         HashSet<String> hs = new HashSet<>();
         for(int x=0;x<board.length;x++)
@@ -314,7 +354,6 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
         {
             vertex parent = ll.removeFirst();
             parent.setVisited(true);
-
 
                 hs.add(parent.row+" "+parent.col);
                 if (parent.getVal() == 0 || parent.getVal() == 2)
@@ -337,6 +376,7 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
                         if(!hs.contains(v.getRow()+" "+v.getCol()))
                         {
                             v.setParent(parent);
+                            everything.add(v);
                             ll.addLast(v);
                             hs.add(v.getRow()+" "+v.getCol());
                         }
@@ -364,7 +404,9 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
         }
         LinkedList<vertex> ll = new LinkedList<>();
         ll.add(board[startRow][startCol]);
+        board[startRow][startCol].setDirection(1);
         ll.add(board[endRow][endCol]);
+        board[endRow][endCol].setDirection(2);
 
         while(!ll.isEmpty())
         {
@@ -389,30 +431,31 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
                 while (!ll2.isEmpty())
                 {
                     vertex v = ll2.removeFirst();
-                    if(v.getDirection()==1 && parent.getDirection()==2)
+                    if(v.getVal()!=1)
                     {
-                        //v.setParent(parent);
-                        screen[endRow][endCol].setParent(v.getParent());
-                        return v;
-                    }
-                    if(!hs.contains(v.getRow()+" "+v.getCol()))
-                    {
-                        if(parent.getDirection()==1)
+                        if (hs.contains(v.getRow() + " " + v.getCol()) && ((parent.getDirection() == 1 && v.getDirection() == 2) || (parent.getDirection() == 2 && v.getDirection() == 1)))
                         {
-                            v.setParent(parent);
-                            v.setDirection(1);
-                            ll.addLast(v);
-                            hs.add(v.getRow() + " " + v.getCol());
+                            screen[startRow][startCol].setParent(parent);
+                            return v;
                         }
-                        else
-                        {
-                            v.setParent(parent);
-                            v.setDirection(2);
-                            ll.addLast(v);
-                            hs.add(v.getRow() + " " + v.getCol());
-                        }
-                    }
 
+                        if (!hs.contains(v.getRow() + " " + v.getCol()))
+                        {
+                            if (parent.getDirection() == 1)
+                            {
+                                v.setParent(parent);
+                                v.setDirection(1);
+                                ll.addLast(v);
+                                hs.add(v.getRow() + " " + v.getCol());
+                            } else
+                            {
+                                v.setParent(parent);
+                                v.setDirection(2);
+                                ll.addLast(v);
+                                hs.add(v.getRow() + " " + v.getCol());
+                            }
+                        }
+                    }
                 }
             }
         }
