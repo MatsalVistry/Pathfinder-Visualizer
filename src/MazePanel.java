@@ -89,12 +89,22 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
 
     public void mouseClicked(MouseEvent e)
     {
+
         if(e.getX()>725 && e.getX()<775 && e.getY()>25 && e.getY()<75)
+        {
+            repaint();
             status = 1;
+        }
         if(e.getX()>725 && e.getX()<775 && e.getY()>100 && e.getY()<150)
+        {
+            repaint();
             status = 2;
+        }
         if(e.getX()>725 && e.getX()<775 && e.getY()>175 && e.getY()<225)
+        {
+            repaint();
             status = 3;
+        }
         if(e.getX()>725 && e.getX()<775 && e.getY()>250 && e.getY()<300)
         {
             search = true;
@@ -103,6 +113,7 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
                 System.out.println(bfs.getRow()+" "+bfs.getCol()+" "+bfs.getVal());
             else
                 System.out.println("No Solution");
+            search = false;
         }
 
         int xpos = e.getX();
