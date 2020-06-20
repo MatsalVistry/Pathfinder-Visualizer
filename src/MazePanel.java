@@ -5,6 +5,7 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 
@@ -17,6 +18,9 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
     int startCol = screen.length/2;
     int endRow = screen[0].length-startRow;
     int endCol = screen.length/2;
+    boolean search = false;
+    int changeRow = 0;
+    int changeCol = 0;
 
 
     public MazePanel ()
@@ -30,6 +34,8 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
             }
         }
         screen[startRow][startCol].setVal(2);
+        screen[endRow][endCol].setVal(3);
+
         addMouseListener(this);
         addKeyListener(this);
         addMouseMotionListener(this);
@@ -37,38 +43,47 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
     }
     public void paint(Graphics g)
     {
-        g.setColor(Color.white);
-        g.fillRect(0,0,700,700);
-        Color lightBrown = new Color(178, 113, 33);
-        g.setColor(lightBrown);
-        g.fillRect(700,0,100,700);
-        g.setColor(Color.black);
-        g.fillRect(725,25,50,50);
-        g.setColor(Color.green);
-        g.fillRect(725,100,50,50);
-        g.setColor(Color.red);
-        g.fillRect(725,175,50,50);
-
-        g.setColor(Color.BLACK);
-        for(int row=0;row<screen.length;row++)
+        if(!search)
         {
-            for(int col=0;col<screen[0].length;col++)
+            g.setColor(Color.white);
+            g.fillRect(0, 0, 700, 700);
+            Color lightBrown = new Color(178, 113, 33);
+            g.setColor(lightBrown);
+            g.fillRect(700, 0, 100, 700);
+            g.setColor(Color.black);
+            g.fillRect(725, 25, 50, 50);
+            g.setColor(Color.green);
+            g.fillRect(725, 100, 50, 50);
+            g.setColor(Color.red);
+            g.fillRect(725, 175, 50, 50);
+            g.setColor(Color.blue);
+            g.fillRect(725, 250, 50, 50);
+
+            g.setColor(Color.BLACK);
+            for (int row = 0; row < screen.length; row++)
             {
-                if(screen[row][col].getVal()==1)
-                    g.fillRect(row*brushWidth,col*brushWidth,brushWidth,brushWidth);
-                else if(screen[row][col].getVal()==2)
+                for (int col = 0; col < screen[0].length; col++)
                 {
-                    g.setColor(Color.green);
-                    g.fillRect(row * brushWidth, col * brushWidth, brushWidth, brushWidth);
-                    g.setColor(Color.black);
-                }
-                else if(screen[row][col].getVal()==3)
-                {
-                    g.setColor(Color.red);
-                    g.fillRect(row * brushWidth, col * brushWidth, brushWidth, brushWidth);
-                    g.setColor(Color.black);
+                    if (screen[row][col].getVal() == 1)
+                        g.fillRect(row * brushWidth, col * brushWidth, brushWidth, brushWidth);
+                    else if (screen[row][col].getVal() == 2)
+                    {
+                        g.setColor(Color.green);
+                        g.fillRect(row * brushWidth, col * brushWidth, brushWidth, brushWidth);
+                        g.setColor(Color.black);
+                    } else if (screen[row][col].getVal() == 3)
+                    {
+                        g.setColor(Color.red);
+                        g.fillRect(row * brushWidth, col * brushWidth, brushWidth, brushWidth);
+                        g.setColor(Color.black);
+                    }
                 }
             }
+        }
+        else
+        {
+            g.setColor(Color.blue);
+            g.fillRect(changeRow * brushWidth, changeCol * brushWidth, brushWidth, brushWidth);
         }
     }
 
@@ -80,6 +95,15 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
             status = 2;
         if(e.getX()>725 && e.getX()<775 && e.getY()>175 && e.getY()<225)
             status = 3;
+        if(e.getX()>725 && e.getX()<775 && e.getY()>250 && e.getY()<300)
+        {
+            search = true;
+            vertex bfs = BFS(screen,startRow,startCol);
+            if(bfs!=null)
+                System.out.println(bfs.getRow()+" "+bfs.getCol()+" "+bfs.getVal());
+            else
+                System.out.println("No Solution");
+        }
 
         int xpos = e.getX();
         xpos -= xpos % brushWidth;
@@ -144,6 +168,7 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
         private int col;
         private vertex parent;
         private int val;
+        private boolean visited;
 
         public vertex(int row, int col, int val)
         {
@@ -151,6 +176,7 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
             this.col=col;
             this.val=val;
             parent=null;
+            visited= false;
         }
 
         public void setVal(char val)
@@ -193,6 +219,16 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
             return parent;
         }
 
+        public boolean isVisited()
+        {
+            return visited;
+        }
+
+        public void setVisited(boolean visited)
+        {
+            this.visited = visited;
+        }
+
         public void setParent(vertex parent)
         {
             this.parent = parent;
@@ -200,41 +236,59 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
         public LinkedList getNeighbors(vertex[][] board)
         {
             LinkedList<vertex> ll = new LinkedList<>();
-            if(row+1<board[0].length)
+            if(row+1<board.length)
                 ll.add(board[row+1][col]);
             if(row-1>=0)
                 ll.add(board[row-1][col]);
-            if(col+1<board.length)
+            if(col+1<board[0].length)
                 ll.add(board[row][col+1]);
             if(col-1>=0)
                 ll.add(board[row][col-1]);
             return ll;
         }
     }
-    public static vertex BFS(vertex[][] board, vertex start)
+    public vertex BFS(vertex[][] board, int startRow, int startCol)
     {
+        HashSet<String> hs = new HashSet<>();
+        for(int x=0;x<board.length;x++)
+        {
+            for(int y=0;y<board[0].length;y++)
+            {
+                board[x][y].setVisited(false);
+            }
+        }
         LinkedList<vertex> ll = new LinkedList<>();
-        ll.add(start);
+        ll.add(board[startRow][startCol]);
 
         while(!ll.isEmpty())
         {
             vertex parent = ll.removeFirst();
-            LinkedList<vertex> vertexes = parent.getNeighbors(board);
+            parent.setVisited(true);
 
-            while(!vertexes.isEmpty())
+            if(!hs.contains(parent.getRow()+" "+parent.getCol()))
             {
-                vertex v = vertexes.removeFirst();
+                hs.add(parent.row+" "+parent.col);
+                if (parent.getVal() == 0 || parent.getVal() == 2)
+                {
+                    changeRow = parent.getRow();
+                    changeCol = parent.getCol();
+                    paintImmediately(changeRow * brushWidth, changeCol * brushWidth, brushWidth, brushWidth);
 
-                if(v.getVal()==5)
-                {
-                    v.setParent(parent);
-                    return v;
+                    LinkedList<vertex> ll2 = parent.getNeighbors(board);
+                    while (!ll2.isEmpty())
+                    {
+                        vertex v = ll2.removeFirst();
+                        v.setParent(parent);
+                        ll.addLast(v);
+                        if(v.getVal()==3)
+                            return v;
+
+                    }
                 }
-                if(v.getVal()==0)
-                {
-                    ll.addLast(v);
-                    v.setParent(parent);
-                }
+            }
+            else if(parent.getVal()==3)
+            {
+                return parent;
             }
         }
         return null;
