@@ -32,8 +32,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/MazePanel.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="367">
-              <caret line="441" column="25" lean-forward="true" selection-start-line="441" selection-start-column="25" selection-end-line="441" selection-end-column="25" />
+            <state relative-caret-position="77">
+              <caret line="69" column="32" lean-forward="true" selection-start-line="69" selection-start-column="32" selection-end-line="69" selection-end-column="32" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -73,9 +73,13 @@
       <find>5</find>
       <find>17   36</find>
       <find>25   40</find>
+      <find>7</find>
+      <find>brushWidth/3</find>
     </findStrings>
     <replaceStrings>
       <replace>brushWidth</replace>
+      <replace>brushWidth/2</replace>
+      <replace>brushWidth-brushWidth/3</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -104,6 +108,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="PackagesPane" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -120,8 +126,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -170,7 +174,7 @@
     <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.12281879" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.12550336" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -250,8 +254,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/MazePanel.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="367">
-          <caret line="441" column="25" lean-forward="true" selection-start-line="441" selection-start-column="25" selection-end-line="441" selection-end-column="25" />
+        <state relative-caret-position="77">
+          <caret line="69" column="32" lean-forward="true" selection-start-line="69" selection-start-column="32" selection-end-line="69" selection-end-column="32" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

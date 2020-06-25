@@ -68,30 +68,33 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
         g.fillRect(725, 325, 50, 50);
 
         g.setColor(Color.BLACK);
-        for (int row = 0; row < screen.length; row++)
+        if(!search)
         {
-            for (int col = 0; col < screen[0].length; col++)
+            for (int row = 0; row < screen.length; row++)
             {
-                if (screen[row][col].getVal() == 1)
-                    g.fillRect(col * brushWidth, row * brushWidth, brushWidth, brushWidth);
-                else if (screen[row][col].getVal() == 2)
+                for (int col = 0; col < screen[0].length; col++)
                 {
-                    g.setColor(Color.green);
-                    g.fillRect(col * brushWidth, row * brushWidth, brushWidth, brushWidth);
-                    g.setColor(Color.black);
-                } else if (screen[row][col].getVal() == 3)
-                {
-                    g.setColor(Color.red);
-                    g.fillRect(col * brushWidth, row * brushWidth, brushWidth, brushWidth);
-                    g.setColor(Color.black);
+                    if (screen[row][col].getVal() == 1)
+                        g.fillRoundRect(col * brushWidth, row * brushWidth, brushWidth, brushWidth, brushWidth-brushWidth/4, brushWidth-brushWidth/4);
+                    else if (screen[row][col].getVal() == 2)
+                    {
+                        g.setColor(Color.green);
+                        g.fillRoundRect(col * brushWidth, row * brushWidth, brushWidth, brushWidth, brushWidth-brushWidth/4, brushWidth-brushWidth/4);
+                        g.setColor(Color.black);
+                    } else if (screen[row][col].getVal() == 3)
+                    {
+                        g.setColor(Color.red);
+                        g.fillRoundRect(col * brushWidth, row * brushWidth, brushWidth, brushWidth, brushWidth-brushWidth/4, brushWidth-brushWidth/4);
+                        g.setColor(Color.black);
+                    }
                 }
             }
         }
 
-        if(search && !sol)
+        else if(search && !sol)
         {
             g.setColor(Color.blue);
-            g.fillRect(changeCol * brushWidth, changeRow * brushWidth, brushWidth, brushWidth);
+            g.fillRoundRect(changeCol * brushWidth, changeRow * brushWidth, brushWidth, brushWidth,brushWidth-brushWidth/4,brushWidth-brushWidth/4);
         }
         else
         {
@@ -100,23 +103,23 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
             while(!everything.isEmpty())
             {
                 vertex v = everything.removeFirst();
-                g.fillRect(v.getCol() * brushWidth, v.getRow() * brushWidth, brushWidth, brushWidth);
+                g.fillRoundRect(v.getCol() * brushWidth, v.getRow() * brushWidth, brushWidth, brushWidth,brushWidth-brushWidth/4,brushWidth-brushWidth/4);
             }
             g.setColor(Color.orange);
             while(!path.isEmpty())
             {
                 vertex v = path.removeFirst();
-                g.fillRect(v.getCol() * brushWidth, v.getRow() * brushWidth, brushWidth, brushWidth);
+                g.fillRoundRect(v.getCol() * brushWidth, v.getRow() * brushWidth, brushWidth, brushWidth,brushWidth-brushWidth/4,brushWidth-brushWidth/4);
             }
             g.setColor(Color.green);
-            g.fillRect(startCol * brushWidth, startRow * brushWidth, brushWidth, brushWidth);
+            g.fillRoundRect(startCol * brushWidth, startRow * brushWidth, brushWidth, brushWidth,brushWidth-brushWidth/4,brushWidth-brushWidth/4);
             g.setColor(Color.red);
-            g.fillRect(endCol * brushWidth, endRow * brushWidth, brushWidth, brushWidth);
+            g.fillRoundRect(endCol * brushWidth, endRow * brushWidth, brushWidth, brushWidth,brushWidth-brushWidth/4,brushWidth-brushWidth/4);
 
             g.setColor(Color.BLACK);
             for(vertex v : walls)
             {
-                g.fillRect(v.getCol() * brushWidth, v.getRow() * brushWidth, brushWidth, brushWidth);
+                g.fillRoundRect(v.getCol() * brushWidth, v.getRow() * brushWidth, brushWidth, brushWidth,brushWidth-brushWidth/4,brushWidth-brushWidth/4);
             }
             search=false;
             sol = false;
