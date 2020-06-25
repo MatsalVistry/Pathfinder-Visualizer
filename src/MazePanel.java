@@ -1,14 +1,9 @@
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.LinkedList;
-
 
 public class MazePanel extends JPanel implements MouseListener, KeyListener, MouseMotionListener
 {
@@ -29,6 +24,8 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
     LinkedList<vertex> path = new LinkedList<>();
     LinkedList<vertex> everything = new LinkedList<>();
     ArrayList<vertex> walls = new ArrayList<>();
+    ArrayList<String> algorithms = new ArrayList<>();
+    int currentAlgo = 0;
 
 
     public MazePanel ()
@@ -43,6 +40,8 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
         }
         screen[startRow][startCol].setVal(2);
         screen[endRow][endCol].setVal(3);
+        algorithms.add("BFS");
+        algorithms.add("BDS");
 
         addMouseListener(this);
         addKeyListener(this);
@@ -51,6 +50,8 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
     }
     public void paint(Graphics g)
     {
+        Font tr = new Font("TimesRoman", Font.PLAIN, 18);
+        g.setFont(tr);
         g.setColor(Color.white);
         g.fillRect(0, 0, 700, 700);
         Color lightBrown = new Color(178, 113, 33);
@@ -58,14 +59,28 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
         g.fillRect(700, 0, 100, 700);
         g.setColor(Color.black);
         g.fillRect(725, 25, 50, 50);
+        g.drawString("Walls",725,20);
+
         g.setColor(Color.green);
         g.fillRect(725, 100, 50, 50);
+        g.drawString("Entrance",725,95);
+
         g.setColor(Color.red);
         g.fillRect(725, 175, 50, 50);
+        g.drawString("Exit",725,170);
+
         g.setColor(Color.blue);
         g.fillRect(725, 250, 50, 50);
+        g.drawString("Begin",725,245);
+
         g.setColor(Color.white);
         g.fillRect(725, 325, 50, 50);
+        g.drawString("Clear",725,320);
+
+        g.setColor(Color.gray);
+        g.fillRect(725, 400, 50, 50);
+        g.drawString("Toggle",725,395);
+        g.drawString(algorithms.get(currentAlgo),725,475);
 
         g.setColor(Color.BLACK);
         if(!search)
@@ -123,6 +138,8 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
             }
             search=false;
             sol = false;
+            System.out.println("Finished Search");
+
         }
     }
 
@@ -144,17 +161,28 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
             repaint();
             status = 3;
         }
+        if(e.getX()>725 && e.getX()<775 && e.getY()>400 && e.getY()<450)
+        {
+            currentAlgo = (1+currentAlgo) % algorithms.size();
+            repaint();
+        }
         if(e.getX()>725 && e.getX()<775 && e.getY()>250 && e.getY()<300)
         {
             search = true;
-            vertex bfs = BDS(screen);
+            everything.clear();
+            path.clear();
+            vertex algo = null;
+            if(algorithms.get(currentAlgo).equals("BFS"))
+                algo = BFS(screen);
+            else if(algorithms.get(currentAlgo).equals("BDS"))
+                algo = BDS(screen);
 
-            if(bfs==null)
+            if(algo==null)
                 System.out.println("No Solution");
             else
             {
                 sol = true;
-                while (bfs.getParent() != null)
+                while (algo.getParent() != null)
                 {
                     try
                     {
@@ -163,18 +191,16 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
                     {
                         ex.printStackTrace();
                     }
-                    //paintImmediately(bfs.getRow() * brushWidth, bfs.getCol() * brushWidth, brushWidth, brushWidth);
-                    System.out.println(bfs.getRow() + " s " + bfs.getCol());
-                    path.addLast(bfs);
-                    bfs = bfs.getParent();
+                    System.out.println(algo.getRow() + " s " + algo.getCol());
+                    path.addLast(algo);
+                    algo = algo.getParent();
                 }
             }
             search = true;
             sol = true;
             repaint();
-            System.out.println("Finished Search");
         }
-        if(e.getX()>725 && e.getX()<775 && e.getY()>325 && e.getY()<375)
+        else if(e.getX()>725 && e.getX()<775 && e.getY()>325 && e.getY()<375)
         {
             status = 1;
             search = false;
@@ -348,6 +374,7 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
             for(int y=0;y<board[0].length;y++)
             {
                 board[x][y].setVisited(false);
+                board[x][y].setParent(null);
             }
         }
         LinkedList<vertex> ll = new LinkedList<>();
@@ -356,7 +383,6 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
         while(!ll.isEmpty())
         {
             vertex parent = ll.removeFirst();
-            parent.setVisited(true);
 
                 hs.add(parent.row+" "+parent.col);
                 if (parent.getVal() == 0 || parent.getVal() == 2)
@@ -403,6 +429,7 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
             for(int y=0;y<board[0].length;y++)
             {
                 board[x][y].setVisited(false);
+                board[x][y].setParent(null);
             }
         }
         LinkedList<vertex> ll = new LinkedList<>();
@@ -414,7 +441,6 @@ public class MazePanel extends JPanel implements MouseListener, KeyListener, Mou
         while(!ll.isEmpty())
         {
             vertex parent = ll.removeFirst();
-            parent.setVisited(true);
 
             hs.add(parent.row+" "+parent.col);
             if (parent.getVal() == 0 || parent.getVal() == 2 || parent.getVal()==3)
